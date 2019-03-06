@@ -4,14 +4,22 @@ body {
 }
 
 #loading {
-    text-align: center;
-    background: url(../images/loading4.gif);
-    display: block;
+    width: 50%;
     height: 350px;
-    margin: 0 auto;
-    background-repeat: no-repeat;
-    
+    padding: 0!important;
 
+
+}
+
+#loadingGif {
+    position: relative;
+    /* where the next element will be automatically positioned */
+    display: inline-block;
+    /* causes element width to shrink to fit content */
+    left: 50%;
+    /* moves left side of image/element to center of parent element */
+    transform: translate(-50%);
+    /* centers image/element on "left: 50%" position */
 }
 
 #uberlogo,
