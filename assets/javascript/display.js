@@ -134,6 +134,7 @@ $(document).ready(function() {
     $("#submit").on("click", function(event) {
         event.preventDefault();
         startLocation = $("#startLocation").val().trim();
+        console.log("start location = " + startLocation)
         destination = $("#destination").val().trim();
         mpg = $("#mpg").val();
 
@@ -314,7 +315,8 @@ $(document).ready(function() {
     function uberInfo(y, x, yy, xx) { //starting latitude=x, starting longitude = y, ending latitude = xx, ending longitude = yy
 
         //This token will need to be updated
-        var token = "KA.eyJ2ZXJzaW9uIjoyLCJpZCI6InlaL3ZIdkJnU05TUkZFeTdiUFZuQVE9PSIsImV4cGlyZXNfYXQiOjE1MTM1NjU1NTQsInBpcGVsaW5lX2tleV9pZCI6Ik1RPT0iLCJwaXBlbGluZV9pZCI6MX0.OiMPjfswSr6QI5IdKzHDro8udDWi4Ok0C5a1oKrO_kQ";
+        // var token = "KA.eyJ2ZXJzaW9uIjoyLCJpZCI6InlaL3ZIdkJnU05TUkZFeTdiUFZuQVE9PSIsImV4cGlyZXNfYXQiOjE1MTM1NjU1NTQsInBpcGVsaW5lX2tleV9pZCI6Ik1RPT0iLCJwaXBlbGluZV9pZCI6MX0.OiMPjfswSr6QI5IdKzHDro8udDWi4Ok0C5a1oKrO_kQ";
+        var token = "JA.VUNmGAAAAAAAEgASAAAABwAIAAwAAAAAAAAAEgAAAAAAAAG8AAAAFAAAAAAADgAQAAQAAAAIAAwAAAAOAAAAkAAAABwAAAAEAAAAEAAAAHM9yltJLHq46SqyGg2eFrBsAAAAJCGs_7y_cbM6-RpV15RxSV-bFwNAGDP_3s4xBsEWkrdrTKkVo-Z7DvWvcGcmleO4MEb5xACGtsHQg1B7VMRH9S7mt2zNEg6kYZJkmBLTMoFTOCniCxGhhmL1OoQScncw9ZOyRcqT3fOemcGHDAAAAPaZVkD15Hl-OBSbTSQAAABiMGQ4NTgwMy0zOGEwLTQyYjMtODA2ZS03YTRjZjhlMTk2ZWU"
         var d1 = new $.Deferred();
         var d2 = new $.Deferred();
         // AJAX request for Uber's time estimate information    
@@ -330,7 +332,7 @@ $(document).ready(function() {
                 console.log(uberTimeResults);
                 //This loop will ensure we get the data for uberX, we can easily add another if statement to set a variable in case we want to an estimate for other types of uber
                 for (var i = 0; i < uberTimeResults.times.length; i++) {
-                    if ("uberX" === uberTimeResults.times[i].display_name) {
+                    if ("UberX" === uberTimeResults.times[i].display_name) {
                         var uberXindex = i;
                     }
                 }
@@ -345,6 +347,9 @@ $(document).ready(function() {
                     $("#uberETAAfter").text(" away!");
                 }
                 d1.resolve(minutesTilUber);
+            },
+            error: function() {
+                console.log("uber time estimate error 2")
             }
         });
 
@@ -362,7 +367,7 @@ $(document).ready(function() {
             success: function(uberPriceResults) {
                 console.log(uberPriceResults);
                 for (var i = 0; i < uberPriceResults.prices.length; i++) {
-                    if ("uberX" === uberPriceResults.prices[i].display_name) {
+                    if ("UberX" === uberPriceResults.prices[i].display_name) {
                         var uberXindex = i;
                     }
                 }
@@ -392,8 +397,10 @@ $(document).ready(function() {
     function lyftInfo(y, x, yy, xx) {
 
         var lyftToken;
-        var clientId = '3TY5gGnnFF3h';
-        var clientSecret = 'BoWG3zPcjYe0HSqOvG4IKuIjFm5dT9hM';
+        // var clientId = '3TY5gGnnFF3h';
+        var clientId = 'n_cPRrO1zMdw';
+        // var clientSecret = 'BoWG3zPcjYe0HSqOvG4IKuIjFm5dT9hM';
+        var clientSecret = 'aqcV17IK560wHaYxTm1sU7PVflpJQ70l';
         var d1 = new $.Deferred();
         var d2 = new $.Deferred();
 
@@ -442,6 +449,11 @@ $(document).ready(function() {
                         // $("#lyftETAAfter").text(" away!");
                     }
                     d1.resolve(minutesTilLyft);
+                }).fail(function() {
+                    var minutesTilLyft = 5
+                    $("#lyftETABefore").html("A driver in your area is <span id='lyftETA'>" + minutesTilLyft + " minutes</span> away! (simulated)")
+                    console.log('display.js lyft eta estimate failed')
+                    d1.resolve(minutesTilLyft);
                 });
 
                 //Uses token to request price estimate
@@ -481,11 +493,18 @@ $(document).ready(function() {
                         $("#lyftcost").text("No price estimate available.");
                     }
                     d2.resolve(lyftPrice);
+                }).fail(function() {
+                    var lyftPrice = "$25"
+                    $("#lyftcost").text('$25 (simulated)')
+                    console.log('display.js lyft price estime failed')
+                    d2.resolve(lyftPrice)
                 });
 
 
-            } //ends success
-
+            }, //ends success
+            error: function() {
+                console.log('display.js lyft token request failed')
+            }
         }); //ends initial AJAX request
         return $.when(d1, d2).done(function() {
             console.log('both tasks in lyftInfo are done');
