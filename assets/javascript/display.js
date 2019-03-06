@@ -147,6 +147,7 @@ $(document).ready(function() {
             if (!$("#locationcheck").prop("checked")) {
                 $("#main").hide();
                 $("#loading").show();
+                console.log("location check checked")
                 getStartLatLong().done(function() {
                     console.log("click: " + startLat + ", " + startLng);
                     getDestLatLong().done(function() {
@@ -166,6 +167,7 @@ $(document).ready(function() {
             else {
                 $("#main").hide();
                 $("#loading").show();
+                console.log('else happened')
                 getLocation(startAddress).done(function() {
                     console.log("click: " + startLat + ", " + startLng);
                     console.log("STARTADDRESS : " + startAddress);
@@ -198,8 +200,9 @@ $(document).ready(function() {
     function getLocation() {
         var d1 = new $.Deferred();
         var d2 = new $.Deferred();
+        console.log('getLocation started')
         var showPosition = function(position) {
-
+            console.log('showPosition started')
             startLat = position.coords.latitude;
             startLng = position.coords.longitude;
 
@@ -216,6 +219,8 @@ $(document).ready(function() {
                 console.log(startAddress);
                 $("#arrow").show();
                 d1.resolve(startAddress)
+            }).fail(function() {
+                console.log('geoFAIL')
             });
 
 
@@ -228,10 +233,27 @@ $(document).ready(function() {
             console.log("my position: " + position.coords.latitude + "," + position.coords.longitude);
         };
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showPosition);
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
         }
         else {
             lattitude.innerHTML = "Geolocation is not supported by this browser.";
+        }
+
+        function showError(error) {
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    alert("User denied the request for Geolocation, please refresh and try again or use destination.")
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert("Location information is unavailable for your device, please refresh and try again or use destination.")
+                    break;
+                case error.TIMEOUT:
+                    alert("The request to get user location timed out, please refresh and try again or use destination.")
+                    break;
+                case error.UNKNOWN_ERROR:
+                    alert("An unknown error occurred, please refresh and try again or use destination.")
+                    break;
+            }
         }
         return $.when(d1, d2).done(function() {
             console.log('both tasks in getLocation are done');
